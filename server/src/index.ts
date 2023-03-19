@@ -11,7 +11,7 @@ import socketMain from "./socketMain";
 
 config();
 
-const PORT = +process.env.PORT || 8181;
+const PORT = +process.env.PORT || 3000;
 const REDIS_PORT = +process.env.REDIS_PORT || 6373;
 const num_processes = cpus().length;
 
