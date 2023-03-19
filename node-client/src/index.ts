@@ -1,4 +1,37 @@
+import { config } from "dotenv";
 import * as os from "os";
+import { io } from "socket.io-client";
+
+config();
+
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:3000";
+const CLIENT_KEY = process.env.CLIENT_KEY || "NOTsafe";
+const INTERVAL_MS = +process.env.INTERVAL_MS || 1000;
+
+const socket = io(SERVER_URL);
+
+socket.on("connect", () => {
+  console.log("Connected to socket server");
+  const netI = os.networkInterfaces();
+  let macA: string;
+  for (let key in netI) {
+    if (!netI[key][0].internal) {
+      macA = netI[key][0].mac;
+      break;
+    }
+  }
+
+  socket.emit("client-auth", CLIENT_KEY);
+
+  const performanceDataInterval = setInterval(async () => {
+    socket.emit("performance-data", await getPerformanceData());
+  }, INTERVAL_MS);
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected from socket server");
+    clearInterval(performanceDataInterval);
+  });
+});
 
 type TimesKeyType = "user" | "nice" | "sys" | "idle" | "irq";
 function getCpuAverage(): { idle: number; total: number } {
@@ -57,9 +90,3 @@ async function getPerformanceData() {
     cpuLoad,
   };
 }
-
-/*
-setInterval(async () => {
-  console.log(await getPerformanceData());
-}, 250);
-*/

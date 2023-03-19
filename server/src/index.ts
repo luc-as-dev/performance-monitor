@@ -7,21 +7,23 @@ import { fingerprint32 } from "farmhash";
 import { createServer as createNetServer, Socket as netSocket } from "net";
 import { Server, Socket as ioSocket } from "socket.io";
 import { createClient } from "redis";
-import socketMain from "./socketMain";
 
 config();
 
+import socketMain from "./socketMain";
+
 const PORT = +process.env.PORT || 3000;
 const REDIS_PORT = +process.env.REDIS_PORT || 6373;
+
 const num_processes = cpus().length;
 
 if (cluster.isPrimary) {
-  let workers: Worker[] = [];
+  const workers: Worker[] = [];
 
-  let spawn = function (i: number) {
+  const spawn = function (i: number) {
     workers[i] = cluster.fork();
 
-    workers[i].on("exit", function (code, signal) {
+    workers[i].on("exit", function () {
       console.log("Respawning worker", i);
       spawn(i);
     });
@@ -38,7 +40,7 @@ if (cluster.isPrimary) {
   const server = createNetServer(
     { pauseOnConnect: true },
     (connection: netSocket) => {
-      let worker =
+      const worker =
         workers[worker_index(connection.remoteAddress, num_processes)];
       worker.send("sticky-session:connection", connection);
     }
@@ -51,7 +53,7 @@ if (cluster.isPrimary) {
 
   const server = app.listen(0, "localhost");
   const io = new Server(server);
-  console.log("Worker listening...");
+  console.log("|- Worker listening...");
 
   const pubClient = createClient({ url: `redis://localhost:${REDIS_PORT}` });
   const subClient = pubClient.duplicate();
@@ -60,7 +62,7 @@ if (cluster.isPrimary) {
 
   io.on("connection", function (socket: ioSocket) {
     socketMain(io, socket);
-    console.log(`connected to worker: ${cluster.worker.id}`);
+    console.log(`Connected to worker: ${cluster.worker.id}`);
   });
 
   process.on("message", function (message, connection: netSocket) {
