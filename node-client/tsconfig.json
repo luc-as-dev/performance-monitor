@@ -8,7 +8,6 @@
  "resolveJsonModule": true,
  "sourceMap": true,
  "outDir": "dist",
- "watch": true,
  "baseUrl": ".",
  "paths": {
  "*": ["node_modules/*"]
