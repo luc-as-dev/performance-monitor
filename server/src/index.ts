@@ -52,7 +52,7 @@ if (cluster.isPrimary) {
   const app = express();
 
   const server = app.listen(0, "localhost");
-  const io = new Server(server);
+  const io = new Server(server, { cors: { origin: "*" } });
   console.log(`|--  Worker [${cluster.worker.id}] listening...`);
 
   const pubClient = createClient({ url: `redis://localhost:${REDIS_PORT}` });
