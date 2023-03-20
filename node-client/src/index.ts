@@ -7,6 +7,7 @@ config();
 const SERVER_URL = process.env.SERVER_URL || "http://localhost:3000";
 const CLIENT_KEY = process.env.CLIENT_KEY || "NOTsafe";
 const INTERVAL_MS = +process.env.INTERVAL_MS || 1000;
+const DEVICE_NAME = process.env.DEVICE_NAME || "Computer";
 
 const socket = io(SERVER_URL);
 
@@ -17,6 +18,8 @@ socket.on("connect", async () => {
   socket.emit("client-auth", CLIENT_KEY);
 
   socket.emit("init-machine", {
+    lastOnline: null,
+    deviceName: DEVICE_NAME,
     macAddress,
     performanceData: await getPerformanceData(),
   });
@@ -80,7 +83,12 @@ async function getPerformanceData() {
   const totalMem: number = os.totalmem();
   const usedMem: number = totalMem - freeMem;
   const memUsage: number = Math.floor((usedMem / totalMem) * 100) / 100;
-  const osType: string = os.type() == "Darwin" ? "Mac" : os.type();
+  const osType: string =
+    os.type() == "Darwin"
+      ? "Mac"
+      : os.type() == "Windows_NT"
+      ? "Windows"
+      : os.type();
   const upTime: number = os.uptime();
   const numCores: number = cpus.length;
   const cpuSpeed: number = cpus[0].speed;

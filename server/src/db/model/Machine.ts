@@ -2,6 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import IMachine from "../../@types/Machine";
 
 const machineSchema = new Schema<IMachine>({
+  deviceName: String,
+  lastOnline: Date,
   macAddress: String,
   performanceData: {
     totalMem: Number,

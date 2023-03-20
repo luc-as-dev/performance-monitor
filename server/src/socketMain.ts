@@ -26,19 +26,30 @@ export default function socketMain(io: Server, socket: Socket) {
   let macAddress: string;
   console.log(`Socket[${socket.id}] Connected`);
 
-  socket.on("client-auth", (key: string) => {
+  socket.on("client-auth", async (key: string) => {
     if (key === CLIENT_KEY) {
       console.log(`Socket[${socket.id}] Joined clients`);
-      socket.join("clients");
+      socket.join("machine");
+      socket.on("disconnect", async () => {
+        const machine = await Machine.findOne({ macAddress });
+        machine.lastOnline = Date.now();
+        if (useDB) fixMachineSave(machine);
+        io.to("ui-clients").emit("machine-disconnect", machine);
+      });
     } else if (key === UI_CLIENT_KEY) {
       console.log(`Socket[${socket.id}] Joined ui-clients`);
       socket.join("ui-clients");
+      if (useDB) {
+        const machines = await Machine.find<IMachine[]>({});
+        socket.emit("client-list", machines);
+      }
     } else socket.disconnect();
   });
 
-  socket.on("init-machine", async (data: IMachine) => {
-    macAddress = data.macAddress;
-    if (useDB) fixMachineSave(data);
+  socket.on("init-machine", async (machine: IMachine) => {
+    macAddress = machine.macAddress;
+    io.to("ui-clients").emit("machine-connect", machine);
+    if (useDB) fixMachineSave(machine);
   });
 
   socket.on("performance-data", (data: IPerformanceData) => {
@@ -49,12 +60,17 @@ export default function socketMain(io: Server, socket: Socket) {
   });
 }
 
-async function fixMachineSave(data: IMachine) {
+async function fixMachineSave(latestMachine: IMachine): Promise<void> {
   const machine = await Machine.findOne<IMachine>({
-    macAddress: data.macAddress,
+    macAddress: latestMachine.macAddress,
   });
   if (!machine) {
-    const newMachine = new Machine(data);
+    const newMachine = new Machine(latestMachine);
     await newMachine.save();
+  } else {
+    await Machine.updateOne(
+      { macAddress: latestMachine.macAddress },
+      latestMachine
+    );
   }
 }
