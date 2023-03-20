@@ -24,12 +24,16 @@ if (MONGO_URI) {
 
 export default function socketMain(io: Server, socket: Socket) {
   let macAddress: string;
-  process.stdout.write(`Socket connected: ${socket.id} `);
+  console.log(`Socket[${socket.id}] Connected`);
 
   socket.on("client-auth", (key: string) => {
-    if (key === CLIENT_KEY) socket.join("clients");
-    else if (key === UI_CLIENT_KEY) socket.join("ui-clients");
-    else socket.disconnect();
+    if (key === CLIENT_KEY) {
+      console.log(`Socket[${socket.id}] Joined clients`);
+      socket.join("clients");
+    } else if (key === UI_CLIENT_KEY) {
+      console.log(`Socket[${socket.id}] Joined ui-clients`);
+      socket.join("ui-clients");
+    } else socket.disconnect();
   });
 
   socket.on("init-machine", async (data: IMachine) => {
@@ -37,7 +41,9 @@ export default function socketMain(io: Server, socket: Socket) {
     if (useDB) fixMachineSave(data);
   });
 
-  socket.on("performance-data", (data: IPerformanceData) => {});
+  socket.on("performance-data", (data: IPerformanceData) => {
+    io.to("ui-clients").emit("performance-data", data);
+  });
 }
 
 async function fixMachineSave(data: IMachine) {
