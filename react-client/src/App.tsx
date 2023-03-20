@@ -26,6 +26,7 @@ export default function App({}: Props) {
         ...prev,
         [machine.macAddress]: {
           ...prev[machine.macAddress],
+          deviceName: machine.deviceName,
           lastOnline: machine.lastOnline,
           performanceData: machine.performanceData,
         },
