@@ -1,7 +1,5 @@
-import moment from "moment";
 import React, { useEffect, useState } from "react";
 import IMachine from "./@types/Machine";
-import IPerformanceData from "./@types/PerformanceData";
 import socket from "./utilities/socketConnection";
 
 type Props = {};
@@ -69,17 +67,19 @@ export default function App({}: Props) {
         return (
           <div key={macAddress} className="bg-gray-100 p-5 shadow-md">
             <div className="">
-              <div className="flex justify-between">
-                <h2>{machine.deviceName}</h2>
+              <div className="border-gray-300 border-b flex justify-between">
+                <h2 className="font-semibold text-lg">{machine.deviceName}</h2>
                 <h3 className="">
-                  {machine.lastOnline
-                    ? moment(machine.lastOnline).startOf("minute").fromNow()
-                    : "Online"}
+                  {machine.lastOnline ? (
+                    <span className="text-red-500 font-semibold"> Offline</span>
+                  ) : (
+                    <span className="text-green-500 font-semibold">Online</span>
+                  )}
                 </h3>
               </div>
               <h3>OS: {machine.performanceData.osType}</h3>
               <div className="flex justify-between">
-                <h3 className="">CPU</h3>
+                <h3 className="w-14">CPU</h3>
                 <div className="flex gap-1">
                   <h4 className="">{machine.performanceData.cpuModel}</h4>
                   <h4 className="">{machine.performanceData.numCores} Cores</h4>
@@ -91,7 +91,7 @@ export default function App({}: Props) {
                 </h3>
               </div>
               <div className="flex justify-between">
-                <h3 className="">MEM</h3>
+                <h3 className="w-14">MEM</h3>
                 <h3 className="">
                   {Math.round(machine.performanceData.totalMem / 1073741824)}GB
                 </h3>
