@@ -14,8 +14,10 @@ import socketMain from "./socketMain";
 
 const PORT = +process.env.PORT || 3000;
 const REDIS_PORT = +process.env.REDIS_PORT || 6373;
+const MAX_WORKERS = +process.env.MAX_WORKERS || undefined;
 
-const num_processes = cpus().length;
+const num_processes =
+  MAX_WORKERS && MAX_WORKERS < cpus().length ? MAX_WORKERS : cpus().length;
 
 if (cluster.isPrimary) {
   const workers: Worker[] = [];
