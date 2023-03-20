@@ -42,7 +42,10 @@ export default function socketMain(io: Server, socket: Socket) {
   });
 
   socket.on("performance-data", (data: IPerformanceData) => {
-    io.to("ui-clients").emit("performance-data", data);
+    io.to("ui-clients").emit("performance-data", {
+      macAddress,
+      performanceData: data,
+    });
   });
 }
 
