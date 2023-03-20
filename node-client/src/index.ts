@@ -10,18 +10,16 @@ const INTERVAL_MS = +process.env.INTERVAL_MS || 1000;
 
 const socket = io(SERVER_URL);
 
-socket.on("connect", () => {
+socket.on("connect", async () => {
   console.log("Connected to socket server");
-  const netI = os.networkInterfaces();
-  let macA: string;
-  for (let key in netI) {
-    if (!netI[key][0].internal) {
-      macA = netI[key][0].mac;
-      break;
-    }
-  }
+  const macAddress = getMacAddress();
 
   socket.emit("client-auth", CLIENT_KEY);
+
+  socket.emit("init-machine", {
+    macAddress,
+    performanceData: await getPerformanceData(),
+  });
 
   const performanceDataInterval = setInterval(async () => {
     socket.emit("performance-data", await getPerformanceData());
@@ -32,6 +30,16 @@ socket.on("connect", () => {
     clearInterval(performanceDataInterval);
   });
 });
+
+function getMacAddress(): string {
+  const netI = os.networkInterfaces();
+
+  for (let key in netI) {
+    if (!netI[key][0].internal) {
+      return netI[key][0].mac;
+    }
+  }
+}
 
 type TimesKeyType = "user" | "nice" | "sys" | "idle" | "irq";
 function getCpuAverage(): { idle: number; total: number } {

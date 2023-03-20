@@ -47,13 +47,13 @@ if (cluster.isPrimary) {
   );
 
   server.listen(PORT);
-  console.log(`Master listening on port ${PORT}`);
+  console.log(`|-   Master listening on port ${PORT}`);
 } else {
   const app = express();
 
   const server = app.listen(0, "localhost");
   const io = new Server(server);
-  console.log("|- Worker listening...");
+  console.log(`|--  Worker [${cluster.worker.id}] listening...`);
 
   const pubClient = createClient({ url: `redis://localhost:${REDIS_PORT}` });
   const subClient = pubClient.duplicate();
@@ -62,7 +62,7 @@ if (cluster.isPrimary) {
 
   io.on("connection", function (socket: ioSocket) {
     socketMain(io, socket);
-    console.log(`Connected to worker: ${cluster.worker.id}`);
+    console.log(`to worker [${cluster.worker.id}]`);
   });
 
   process.on("message", function (message, connection: netSocket) {
