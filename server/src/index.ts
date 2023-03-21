@@ -1,6 +1,5 @@
 import { config } from "dotenv";
 import express from "express";
-import cluster, { Worker } from "cluster";
 import { Server, Socket as ioSocket } from "socket.io";
 
 config();
