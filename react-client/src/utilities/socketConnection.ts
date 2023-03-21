@@ -1,8 +1,9 @@
 import io from "socket.io-client";
 
-const SERVER_URL =
-  import.meta.env.VITE_SOME_SERVER_URL || "http://localhost:3000";
+const SERVER_URL = import.meta.env.VITE_SOME_SERVER_URL;
 const UI_CLIENT_KEY = import.meta.env.VITE_SOME_UI_KEY || "NOTsafeUI";
+
+console.log(`Connecting to ${SERVER_URL}`);
 
 const socket = io(SERVER_URL);
 
