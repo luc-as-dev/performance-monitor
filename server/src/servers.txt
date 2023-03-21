@@ -8,6 +8,14 @@ import { createServer as createNetServer, Socket as netSocket } from "net";
 import { Server, Socket as ioSocket } from "socket.io";
 import { createClient } from "redis";
 
+/*
+"@socket.io/redis-adapter": "^8.1.0",
+"cluster": "^0.7.7",
+"farmhash": "^3.3.0",
+"net": "^1.0.2",
+"redis": "^4.6.5",
+*/
+
 config();
 
 import socketMain from "./socketMain";
